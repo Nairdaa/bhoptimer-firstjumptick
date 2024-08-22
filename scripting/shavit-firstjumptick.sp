@@ -18,7 +18,7 @@ public Plugin myinfo =
 	name = "[shavit] First Jump Tick",
 	author = "Blank & Fixed by Nairda",
 	description = "Print which tick first jump was at",
-	version = "1.1d",
+	version = "1.1e",
 	url = ""
 }
 
@@ -73,19 +73,14 @@ public void Shavit_OnChatConfigLoaded()
 
 public Action Command_FirstJumpTick(int client, int args)
 {
-	if(!gB_FirstJumpTick[client])
-	{
-		gB_FirstJumpTick[client] = true;
-		SetCookie(client, gH_FirstJumpTickCookie, gB_FirstJumpTick[client]);
-		Shavit_PrintToChat(client, "%T", "FirstJumpTickEnabled", client, gS_ChatStrings.sVariable);
-	}
+	gB_FirstJumpTick[client] = !gB_FirstJumpTick[client];
+	SetCookie(client, gH_FirstJumpTickCookie, gB_FirstJumpTick[client]);
 
-	else
-	{
-		gB_FirstJumpTick[client] = false;
-		SetCookie(client, gH_FirstJumpTickCookie, gB_FirstJumpTick[client]);
-		Shavit_PrintToChat(client, "%T", "FirstJumpTickDisabled", client, gS_ChatStrings.sVariable);
-	}
+	char action[32];
+	Format(action, sizeof(action), gB_FirstJumpTick[client] ? "FirstJumpTickEnabled" : "FirstJumpTickDisabled");
+	Shavit_PrintToChat(client, "%T", action, client, gS_ChatStrings.sVariable);
+	
+	return Plugin_Handled;
 }
 
 public Action OnPlayerJump(Event event, char[] name, bool dontBroadcast)
@@ -110,38 +105,45 @@ public Action OnPlayerJump(Event event, char[] name, bool dontBroadcast)
 
 int GetHUDTarget(int client)
 {
-	int target = client;
-
-	if(IsValidClient(client))
+	if (!IsValidClient(client)) 
 	{
-		int iObserverMode = GetEntProp(client, Prop_Send, "m_iObserverMode");
+		return client;
+	}
 
-		if(iObserverMode >= 3 && iObserverMode <= 5)
+	int iObserverMode = GetEntProp(client, Prop_Send, "m_iObserverMode");
+
+	if (iObserverMode >= 3 && iObserverMode <= 5) 
+	{
+		int iTarget = GetEntPropEnt(client, Prop_Send, "m_hObserverTarget");
+
+		if (IsValidClientIndex(iTarget)) 
 		{
-			int iTarget = GetEntPropEnt(client, Prop_Send, "m_hObserverTarget");
-
-			if(!IsValidClientIndex(iTarget))
-			{
-				target = iTarget;
-			}
+			return iTarget;
 		}
 	}
 
-	return target;
+	return client;
 }
 
 void PrintJumpTick(int client, int target)
 {  
-	if(gB_FirstJumpTick[client])
+	if (!gB_FirstJumpTick[client]) 
 	{
-		if(Shavit_InsideZone(target, Zone_Start, -1))
-		{
-			Shavit_PrintToChat(client, "%T", "ZeroTick", client, gS_ChatStrings.sVariable, gS_ChatStrings.sText);
-		}    
-		else if(Shavit_GetTimerStatus(target) == Timer_Running && Shavit_GetClientJumps(target) == 1)
-		{
-			Shavit_PrintToChat(client, "%T", "PrintFirstJumpTick", client, gS_ChatStrings.sVariable, RoundToFloor((Shavit_GetClientTime(target) * 100)), gS_ChatStrings.sText);
-		}
+		return;
+	}
+
+	bool isInsideZone = Shavit_InsideZone(target, Zone_Start, -1);
+	bool isTimerRunning = Shavit_GetTimerStatus(target) == Timer_Running;
+	bool isFirstJump = Shavit_GetClientJumps(target) == 1;
+
+	if (isInsideZone) 
+	{
+		Shavit_PrintToChat(client, "%T", "ZeroTick", client, gS_ChatStrings.sVariable, gS_ChatStrings.sText);
+	} 
+	else if (isTimerRunning && isFirstJump) 
+	{
+		float clientTime = Shavit_GetClientTime(target) * 100;
+		Shavit_PrintToChat(client, "%T", "PrintFirstJumpTick", client, gS_ChatStrings.sVariable, RoundToFloor(clientTime), gS_ChatStrings.sText);
 	}
 }
 
@@ -156,5 +158,5 @@ stock void SetCookie(int client, Handle hCookie, int n)
 // We don't want the -1 client id bug. Thank Volvo™ for this
 stock bool IsValidClientIndex(int client)
 {
-	return (0 < client <= MaxClients);
+	return (client > 0 && client <= MaxClients);
 }
