@@ -26,25 +26,25 @@ chatstrings_t gS_ChatStrings;
 
 public void OnPluginStart()
 {
-    LoadTranslations("shavit-firstjumptick.phrases");
+	LoadTranslations("shavit-firstjumptick.phrases");
 
-    RegConsoleCmd("sm_fjt", Command_FirstJumpTick, "Toggles Jump Tick Printing");
-    RegConsoleCmd("sm_jumptick", Command_FirstJumpTick, "Toggles Jump Tick Printing");
-    RegConsoleCmd("sm_tick", Command_FirstJumpTick, "Toggles Jump Tick Printing");
-    RegConsoleCmd("sm_jt", Command_FirstJumpTick, "Toggles Jump Tick Printing");
+	RegConsoleCmd("sm_fjt", Command_FirstJumpTick, "Toggles Jump Tick Printing");
+	RegConsoleCmd("sm_jumptick", Command_FirstJumpTick, "Toggles Jump Tick Printing");
+	RegConsoleCmd("sm_tick", Command_FirstJumpTick, "Toggles Jump Tick Printing");
+	RegConsoleCmd("sm_jt", Command_FirstJumpTick, "Toggles Jump Tick Printing");
 
-    gH_FirstJumpTickCookie = RegClientCookie("FJT_enabled", "FJT_enabled", CookieAccess_Protected);
-    gH_CookieSet = RegClientCookie("FJT_default", "FJT_default", CookieAccess_Protected);
+	gH_FirstJumpTickCookie = RegClientCookie("FJT_enabled", "FJT_enabled", CookieAccess_Protected);
+	gH_CookieSet = RegClientCookie("FJT_default", "FJT_default", CookieAccess_Protected);
 
-    for (int i = 1; i <= MaxClients; i++)
-    {
-        if (AreClientCookiesCached(i))
-        {
-            OnClientCookiesCached(i);
-        }
-    }
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (AreClientCookiesCached(i))
+		{
+			OnClientCookiesCached(i);
+		}
+	}
 
-    HookEvent("player_jump", OnPlayerJump);
+	HookEvent("player_jump", OnPlayerJump);
 }
 
 public Action Command_FirstJumpTick(int client, int args)
@@ -76,18 +76,18 @@ public void OnClientCookiesCached(int client)
 
 public Action OnPlayerJump(Event event, char[] name, bool dontBroadcast)
 {
-    int client = GetClientOfUserId(event.GetInt("userid"));
+	int client = GetClientOfUserId(event.GetInt("userid"));
 
-    if (!IsValidClient(client))
+	if (!IsValidClient(client))
 	{
 		return Plugin_Continue;
 	}
 	
-    int target = GetHUDTarget(client);
+	int target = GetHUDTarget(client);
 	
-    PrintJumpTick(client, target);
+	PrintJumpTick(client, target);
 
-    return Plugin_Continue;
+	return Plugin_Continue;
 }
 
 int GetHUDTarget(int client)
