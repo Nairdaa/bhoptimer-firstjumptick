@@ -24,30 +24,39 @@ public Plugin myinfo =
 
 chatstrings_t gS_ChatStrings;
 
-public void OnAllPluginsLoaded()
-{
-	HookEvent("player_jump", OnPlayerJump);
-}
-
 public void OnPluginStart()
 {
-	LoadTranslations("shavit-firstjumptick.phrases");
+    LoadTranslations("shavit-firstjumptick.phrases");
 
-	RegConsoleCmd("sm_fjt", Command_FirstJumpTick, "Toggles Jump Tick Printing");
-	RegConsoleCmd("sm_jumptick", Command_FirstJumpTick, "Toggles Jump Tick Printing");
-	RegConsoleCmd("sm_tick", Command_FirstJumpTick, "Toggles Jump Tick Printing");
-	RegConsoleCmd("sm_jt", Command_FirstJumpTick, "Toggles Jump Tick Printing");
+    RegConsoleCmd("sm_fjt", Command_FirstJumpTick, "Toggles Jump Tick Printing");
+    RegConsoleCmd("sm_jumptick", Command_FirstJumpTick, "Toggles Jump Tick Printing");
+    RegConsoleCmd("sm_tick", Command_FirstJumpTick, "Toggles Jump Tick Printing");
+    RegConsoleCmd("sm_jt", Command_FirstJumpTick, "Toggles Jump Tick Printing");
 
-	gH_FirstJumpTickCookie = RegClientCookie("FJT_enabled", "FJT_enabled", CookieAccess_Protected);
-	gH_CookieSet = RegClientCookie("FJT_default", "FJT_default", CookieAccess_Protected);
+    gH_FirstJumpTickCookie = RegClientCookie("FJT_enabled", "FJT_enabled", CookieAccess_Protected);
+    gH_CookieSet = RegClientCookie("FJT_default", "FJT_default", CookieAccess_Protected);
 
-	for(int i = 1; i <= MaxClients; i++)
-	{
-		if(AreClientCookiesCached(i))
-		{
-			OnClientCookiesCached(i);
-		}
-	}
+    for (int i = 1; i <= MaxClients; i++)
+    {
+        if (AreClientCookiesCached(i))
+        {
+            OnClientCookiesCached(i);
+        }
+    }
+
+    HookEvent("player_jump", OnPlayerJump);
+}
+
+public Action Command_FirstJumpTick(int client, int args)
+{
+	gB_FirstJumpTick[client] = !gB_FirstJumpTick[client];
+	SetCookie(client, gH_FirstJumpTickCookie, gB_FirstJumpTick[client]);
+
+	char action[32];
+	Format(action, sizeof(action), gB_FirstJumpTick[client] ? "FirstJumpTickEnabled" : "FirstJumpTickDisabled");
+	Shavit_PrintToChat(client, "%T", action, client, gS_ChatStrings.sVariable);
+	
+	return Plugin_Handled;
 }
 
 public void OnClientCookiesCached(int client)
@@ -65,42 +74,20 @@ public void OnClientCookiesCached(int client)
 	gB_FirstJumpTick[client] = view_as<bool>(StringToInt(sCookie));
 }
 
-public void Shavit_OnChatConfigLoaded()
-{
-	Shavit_GetChatStrings(sMessageText, gS_ChatStrings.sText, sizeof(chatstrings_t::sText));
-	Shavit_GetChatStrings(sMessageVariable, gS_ChatStrings.sVariable, sizeof(chatstrings_t::sVariable));
-}
-
-public Action Command_FirstJumpTick(int client, int args)
-{
-	gB_FirstJumpTick[client] = !gB_FirstJumpTick[client];
-	SetCookie(client, gH_FirstJumpTickCookie, gB_FirstJumpTick[client]);
-
-	char action[32];
-	Format(action, sizeof(action), gB_FirstJumpTick[client] ? "FirstJumpTickEnabled" : "FirstJumpTickDisabled");
-	Shavit_PrintToChat(client, "%T", action, client, gS_ChatStrings.sVariable);
-	
-	return Plugin_Handled;
-}
-
 public Action OnPlayerJump(Event event, char[] name, bool dontBroadcast)
 {
-	int client = GetClientOfUserId(event.GetInt("userid"));
+    int client = GetClientOfUserId(event.GetInt("userid"));
 
-	if(IsValidClient(client))
+    if (!IsValidClient(client))
 	{
-		for(int i = 1; i <= MaxClients; i++)
-		{
-			if(GetHUDTarget(i) != client)
-			{
-				continue;
-			}
-
-			PrintJumpTick(i, client);
-		}
+		return Plugin_Continue;
 	}
+	
+    int target = GetHUDTarget(client);
+	
+    PrintJumpTick(client, target);
 
-	return Plugin_Continue;
+    return Plugin_Continue;
 }
 
 int GetHUDTarget(int client)
