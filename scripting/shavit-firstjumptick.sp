@@ -131,7 +131,7 @@ int GetHUDTarget(int client)
 	{
 		int iTarget = GetEntPropEnt(client, Prop_Send, "m_hObserverTarget");
 
-		if (IsValidClientIndex(iTarget))
+		if (IsValidClient(iTarget))
 			return iTarget;
 	}
 
@@ -170,10 +170,4 @@ stock void SetCookie(int client, Handle hCookie, int n)
 
 	IntToString(n, sCookie, sizeof(sCookie));
 	SetClientCookie(client, hCookie, sCookie);
-}
-
-// Checks if a client index is valid, because fuck Volvo™
-stock bool IsValidClientIndex(int client)
-{
-	return (client > 0 && client <= MaxClients);
 }
