@@ -1,2 +1,2 @@
-# bhoptimer-firstjumptick
-Displays what tick the player first jumps at
+# shavit-firstjumptick
+Prints the tick at which the very first jump occurred after leaving the start zone
