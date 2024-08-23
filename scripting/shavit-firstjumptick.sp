@@ -64,7 +64,7 @@ public void OnClientCookiesCached(int client)
 	char sCookie[8];
 	GetClientCookie(client, gH_CookieSet, sCookie, sizeof(sCookie));
 
-	if(StringToInt(sCookie) == 0)
+	if (StringToInt(sCookie) == 0)
 	{
 		SetCookie(client, gH_FirstJumpTickCookie, false);
 		SetCookie(client, gH_CookieSet, true);
@@ -79,9 +79,7 @@ public Action OnPlayerJump(Event event, char[] name, bool dontBroadcast)
 	int client = GetClientOfUserId(event.GetInt("userid"));
 
 	if (!IsValidClient(client))
-	{
 		return Plugin_Continue;
-	}
 	
 	int target = GetHUDTarget(client);
 	
@@ -93,9 +91,7 @@ public Action OnPlayerJump(Event event, char[] name, bool dontBroadcast)
 int GetHUDTarget(int client)
 {
 	if (!IsValidClient(client)) 
-	{
 		return client;
-	}
 
 	int iObserverMode = GetEntProp(client, Prop_Send, "m_iObserverMode");
 
@@ -104,9 +100,7 @@ int GetHUDTarget(int client)
 		int iTarget = GetEntPropEnt(client, Prop_Send, "m_hObserverTarget");
 
 		if (IsValidClientIndex(iTarget)) 
-		{
 			return iTarget;
-		}
 	}
 
 	return client;
@@ -115,9 +109,7 @@ int GetHUDTarget(int client)
 void PrintJumpTick(int client, int target)
 {  
 	if (!gB_FirstJumpTick[client]) 
-	{
 		return;
-	}
 
 	bool isInsideZone = Shavit_InsideZone(target, Zone_Start, -1);
 	bool isTimerRunning = Shavit_GetTimerStatus(target) == Timer_Running;
