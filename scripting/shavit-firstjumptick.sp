@@ -110,13 +110,9 @@ void PrintJumpTick(int client, int target)
 	if (!gB_FirstJumpTick[client])
 		return;
 
-	bool isFirstJump = Shavit_GetClientJumps(target) == 1;
-
-	if (isFirstJump)
+	if (Shavit_GetClientJumps(target) == 1)
 	{
-		bool isInsideZone = Shavit_InsideZone(target, Zone_Start, -1);
-
-		if (isInsideZone)
+		if (Shavit_InsideZone(target, Zone_Start, -1))
 		{
 			Shavit_PrintToChat(client, "%T", "ZeroTick", client, gS_ChatStrings.sVariable, gS_ChatStrings.sText);
 		}
